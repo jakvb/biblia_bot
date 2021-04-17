@@ -10,9 +10,8 @@ log = logging.getLogger()
 logging.basicConfig()
 
 bot = commands.Bot(command_prefix= "$")
-AUDIO_PATH = 'audio/'
+AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + 'audio/'
 FILENAME_TEMPLATE = '{}_{}'
-
 
 async def download_audio(chapter, verse):
     url = f'https://api2.biblia.sk/api/audio/{chapter}/{verse}'
