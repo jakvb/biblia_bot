@@ -10,7 +10,7 @@ log = logging.getLogger()
 logging.basicConfig()
 
 bot = commands.Bot(command_prefix= "$")
-AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + 'audio/'
+AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
 
 async def download_audio(chapter, verse):
