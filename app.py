@@ -44,16 +44,19 @@ async def on_message(message):
     if message.content and message.content[0] != '$':
         return
     content = message.content[1:]
-    chapter, verse = content.split(' ')
-    print(chapter, verse)
-    ch = await check_begining(chapter)
-    print(ch)
-    if ch:
-        audio_url = await get_audio(ch, verse)
-        await message.channel.send(f'play {chapter} {verse}')
-        voice = await message.author.voice.channel.connect()
-        voice.play(discord.FFmpegPCMAudio(audio_url))
-        # await voice.disconnect()
+    try:
+        chapter, verse = content.split(' ')
+        print(chapter, verse)
+        ch = await check_begining(chapter)
+        print(ch)
+        if ch:
+            audio_url = await get_audio(ch, verse)
+            await message.channel.send(f'play {chapter} {verse}')
+            voice = await message.author.voice.channel.connect()
+            voice.play(discord.FFmpegPCMAudio(audio_url))
+            # await voice.disconnect()
+    except ValueError as e:
+        print(e, content)
 
 bot.run(config('TOKEN'))
 
