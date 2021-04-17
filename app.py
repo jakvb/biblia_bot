@@ -8,7 +8,7 @@ import logging
 
 
 log = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG, filename='/var/log/app.log')
+logging.basicConfig(level=logging.DEBUG, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
 
 bot = commands.Bot(command_prefix= "$")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
