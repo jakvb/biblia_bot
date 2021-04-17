@@ -59,7 +59,7 @@ async def on_message(message):
             voice.play(discord.FFmpegPCMAudio(audio_url))
             # await voice.disconnect()
     except ValueError as e:
-        log.warning(e, content)
+        log.warning(str(e) + content)
 
 bot.run(config('TOKEN'))
 
