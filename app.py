@@ -1,9 +1,13 @@
-import discord
 import os
-from decouple import config
+import discord
 import requests
-from txt_formating import check_begining
+from decouple import config
 from discord.ext import commands
+from txt_formating import check_begining
+import logging
+
+log = logging.getLogger()
+logging.basicConfig()
 
 bot = commands.Bot(command_prefix= "$")
 AUDIO_PATH = 'audio/'
@@ -17,11 +21,11 @@ async def download_audio(chapter, verse):
         audio_url = ret.json()['src']
         file_bin = requests.get(audio_url)
         filename = FILENAME_TEMPLATE.format(chapter, verse)
-        print(f'downloaded {filename}')
+        log.info(f'downloaded {filename}')
         path = AUDIO_PATH + filename
         with open(path, 'bw') as f:
             f.write(file_bin.content)
-            print(f'saved {filename}')
+            log.info(f'saved {filename}')
         return path
 
 
@@ -34,7 +38,7 @@ async def get_audio(chapter, verse):
 
 @bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(bot))
+    log.info('We have logged in as {0.user}'.format(bot))
 
 
 @bot.event
@@ -46,9 +50,8 @@ async def on_message(message):
     content = message.content[1:]
     try:
         chapter, verse = content.split(' ')
-        print(chapter, verse)
+        log.info(chapter, verse)
         ch = await check_begining(chapter)
-        print(ch)
         if ch:
             audio_url = await get_audio(ch, verse)
             await message.channel.send(f'play {chapter} {verse}')
@@ -56,7 +59,7 @@ async def on_message(message):
             voice.play(discord.FFmpegPCMAudio(audio_url))
             # await voice.disconnect()
     except ValueError as e:
-        print(e, content)
+        log.warning(e, content)
 
 bot.run(config('TOKEN'))
 
