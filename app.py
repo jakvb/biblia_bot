@@ -46,6 +46,8 @@ async def on_message(message):
         return
     if message.content and message.content[0] != '$':
         return
+
+    print([a for a in bot.get_all_channels()])
     content = message.content[1:]
     try:
         chapter, verse = content.split(' ')
@@ -54,7 +56,11 @@ async def on_message(message):
         if ch:
             audio_url = await get_audio(ch, verse)
             await message.channel.send(f'play {chapter} {verse}')
-            voice = await message.author.voice.channel.connect()
+            voice = []
+            for voice in bot.voice_clients:
+                pass
+            if not voice:
+                voice = await message.author.voice.channel.connect()
             voice.play(discord.FFmpegPCMAudio(audio_url))
             # await voice.disconnect()
     except ValueError as e:
