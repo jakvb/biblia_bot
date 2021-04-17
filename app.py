@@ -6,12 +6,14 @@ from discord.ext import commands
 from txt_formating import check_begining
 import logging
 
+
 log = logging.getLogger()
-logging.basicConfig()
+logging.basicConfig(level=logging.DEBUG, filename='app.log')
 
 bot = commands.Bot(command_prefix= "$")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
+
 
 async def download_audio(chapter, verse):
     url = f'https://api2.biblia.sk/api/audio/{chapter}/{verse}'
@@ -35,36 +37,42 @@ async def get_audio(chapter, verse):
     return await download_audio(chapter, verse)
 
 
-@bot.event
-async def on_ready():
-    log.info('We have logged in as {0.user}'.format(bot))
+async def get_channel(message):
+    voice = []
+    for voice in bot.voice_clients:
+        pass
+    if not voice:
+        voice = await message.author.voice.channel.connect()
+    return voice
 
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    if message.content and message.content[0] != '$':
-        return
+@bot.command('stop')
+async def stop(message):
+    voice = await get_channel(message)
+    voice.stop()
 
-    print([a for a in bot.get_all_channels()])
-    content = message.content[1:]
-    try:
+
+@bot.command('pause')
+async def stop(message):
+    voice = await get_channel(message)
+    voice.pause()
+
+
+@bot.command('play')
+async def play(ctx):
+    print(ctx.message.content)
+    message = ctx.message
+
+    content = message.content[6:]
+    if ' ' in content:
         chapter, verse = content.split(' ')
         log.info(chapter, verse)
         ch = await check_begining(chapter)
         if ch:
             audio_url = await get_audio(ch, verse)
-            await message.channel.send(f'play {chapter} {verse}')
-            voice = []
-            for voice in bot.voice_clients:
-                pass
-            if not voice:
-                voice = await message.author.voice.channel.connect()
+            await ctx.send(f'play {chapter} {verse}')
+            voice = await get_channel(message)
             voice.play(discord.FFmpegPCMAudio(audio_url))
-            # await voice.disconnect()
-    except ValueError as e:
-        log.warning(str(e) + content)
 
 bot.run(config('TOKEN'))
 
