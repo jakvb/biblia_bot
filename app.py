@@ -14,6 +14,8 @@ bot = commands.Bot(command_prefix= "$")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
 
+# TODO: state pre kazdy channel_id alebo state obj
+last = ()
 
 async def download_audio(chapter, verse):
     url = f'https://api2.biblia.sk/api/audio/{chapter}/{verse}'
@@ -53,9 +55,25 @@ async def stop(message):
 
 
 @bot.command('pause')
-async def stop(message):
+async def pause(message):
     voice = await get_channel(message)
     voice.pause()
+
+
+@bot.command('next')
+async def next(ctx):
+    message = ctx.message
+    voice = await get_channel(message)
+    global last
+    if len(last) == 2:
+        chapter, verse = last
+        verse = str(int(verse) + 1)
+        audio_url = await get_audio(chapter, verse)
+        await ctx.send(f'play {chapter} {verse}')
+        voice = await get_channel(message)
+        voice.stop()
+        voice.play(discord.FFmpegPCMAudio(audio_url))
+        last = (chapter, verse)
 
 
 @bot.command('play')
@@ -73,6 +91,9 @@ async def play(ctx):
             await ctx.send(f'play {chapter} {verse}')
             voice = await get_channel(message)
             voice.play(discord.FFmpegPCMAudio(audio_url))
+            global last
+            last = (ch, verse)
+
 
 bot.run(config('TOKEN'))
 
