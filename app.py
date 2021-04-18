@@ -10,7 +10,7 @@ from txt_formating import check_begining, books
 log = logging.getLogger()
 logging.basicConfig(level=logging.DEBUG, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
 
-bot = commands.Bot(command_prefix= "$")
+bot = commands.Bot(command_prefix= "a")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
 state = {}
@@ -22,7 +22,7 @@ def download_audio(chapter, verse):
     if ret.status_code == 200:
         audio_url = ret.json()['src']
         file_bin = requests.get(audio_url)
-        if file_bin.content[:6] == '<Error>':
+        if b'<Error><Code>NoSuchKey' in file_bin.content[:150]:
             return None
         filename = FILENAME_TEMPLATE.format(chapter, verse)
         log.info(f'downloaded {filename}')
@@ -40,7 +40,7 @@ def get_audio(chapter, verse):
     return download_audio(chapter, verse)
 
 
-async def is_in_voice(func):
+def is_in_voice(func):
     async def wrapper(ctx):
         if not ctx.message.author.voice:
             await ctx.send("You are not connected to a voice channel")
@@ -94,7 +94,7 @@ async def nexts(ctx):
         chapter, verse = state[voice.channel.id]
         verse = str(int(verse) + 1)
         audio_url = get_audio(chapter, verse)
-        # await ctx.send(f'next {chapter} {verse}')
+        await ctx.send(f'Play next {chapter} {verse}')
         voice.stop()
         voice.play(discord.FFmpegPCMAudio(audio_url))
         state[voice.channel.id] = (chapter, verse)
@@ -159,7 +159,7 @@ def next_path(chapter, verse):
     if not path:
         verse = 1
         try:
-            chapter = books.keys()[books.keys().index(chapter) + 1]
+            chapter = list(books.keys())[list(books.keys()).index(chapter) + 1]
         except KeyError:
             chapter = books.keys()[0]
         return get_audio(chapter, verse), chapter, verse
