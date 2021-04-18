@@ -80,6 +80,9 @@ async def nexts(ctx):
 
 @bot.command('play')
 async def play(ctx):
+    if not ctx.message.author.voice:
+        await ctx.send("You are not connected to a voice channel")
+        return
     print(ctx.message.content)
     message = ctx.message
     channel = message.author.voice.channel
