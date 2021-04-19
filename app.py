@@ -16,6 +16,13 @@ FILENAME_TEMPLATE = '{}_{}'
 state = {}
 
 
+# todo:
+#  random kapitola
+#  premenovat chapter na book a verse na chapter
+#  posielat videa z youtube biblia_za_rok
+#  posuvanie v case (seek)
+
+
 def download_audio(chapter, verse):
     url = f'https://api2.biblia.sk/api/audio/{chapter}/{verse}'
     ret = requests.get(url)
@@ -41,11 +48,16 @@ def get_audio(chapter, verse):
 
 
 def is_in_voice(func):
+    # todo wrapper nefunguje
     async def wrapper(ctx):
         if not ctx.message.author.voice:
             await ctx.send("You are not connected to a voice channel")
             return
-        return func(ctx)
+        try:
+            return func(ctx)
+        except discord.ext.commands.errors.CommandInvokeError:
+            await ctx.send("You are not connected to a voice channel")
+
     return wrapper
 
 
@@ -54,6 +66,19 @@ async def get_channel(channel):
         if voice.channel.id == channel.id:
             return voice
     return await channel.connect()
+
+
+def get_name(voice, action=''):
+    if state.get(voice.channel.id) and len(state[voice.channel.id]) == 2:
+        chapter, verse = state[voice.channel.id]
+        if action == 'play':
+            action = '▶'
+        elif action == 'pause':
+            action = 'Ⅱ'
+        else:
+            return 'Biblia'
+        print(action, books[chapter])
+        return ' '.join([action, books[chapter], verse])
 
 
 @is_in_voice
@@ -66,8 +91,9 @@ async def stop(ctx):
         voice.play(discord.FFmpegPCMAudio(''))
     except:
         pass
-    voice.stop()
 
+    voice.stop()
+    await ctx.message.guild.me.edit(nick=get_name(voice))
 
 
 @is_in_voice
@@ -75,6 +101,7 @@ async def stop(ctx):
 async def pause(ctx):
     voice = await get_channel(ctx.message.author.voice.channel)
     voice.pause()
+    await ctx.message.guild.me.edit(nick=get_name(voice, 'pause'))
 
 
 @is_in_voice
@@ -82,6 +109,7 @@ async def pause(ctx):
 async def resume(ctx):
     voice = await get_channel(ctx.message.author.voice.channel)
     voice.resume()
+    await ctx.message.guild.me.edit(nick=get_name(voice, 'play'))
 
 
 @is_in_voice
@@ -96,10 +124,12 @@ async def nexts(ctx):
         audio_url = get_audio(chapter, verse)
         await ctx.send(f'Play next {chapter} {verse}')
         voice.stop()
-        voice.play(discord.FFmpegPCMAudio(audio_url))
         state[voice.channel.id] = (chapter, verse)
+        voice.play(discord.FFmpegPCMAudio(audio_url))
+        await ctx.message.guild.me.edit(nick=get_name(voice, 'play'))
     else:
         await ctx.send(f'No history')
+
 
 @is_in_voice
 @bot.command('infinite')
@@ -115,11 +145,13 @@ async def infinite(ctx):
         ch = await check_begining(chapter)
         if ch:
             audio_url = get_audio(ch, verse)
+            audio = discord.FFmpegPCMAudio(audio_url)
             await ctx.send(f'Play infinite from {chapter} {verse}')
             voice = await get_channel(channel)
-            voice.play(discord.FFmpegPCMAudio(audio_url), after=lambda e:audio_iter(voice))
             # global state
             state[voice.channel.id] = (ch, verse)
+            await ctx.message.guild.me.edit(nick=get_name(voice, 'play'))
+            voice.play(audio, after=lambda e:audio_iter(voice))
 
 
 @is_in_voice
@@ -138,9 +170,10 @@ async def play(ctx):
             await ctx.send(f'Playing {chapter} {verse}')
             voice = await get_channel(channel)
             voice.stop()
-            voice.play(discord.FFmpegPCMAudio(audio_url))
             global state
             state[voice.channel.id] = (ch, verse)
+            voice.play(discord.FFmpegPCMAudio(audio_url))
+            await ctx.message.guild.me.edit(nick=get_name(voice, 'play'))
 
 
 def audio_iter(voice):
@@ -149,8 +182,9 @@ def audio_iter(voice):
         chapter, verse = state[voice.channel.id]
         audio_url, chapter, verse = next_path(chapter, verse)
         audio = discord.FFmpegPCMAudio(audio_url)
-        voice.play(audio, after=lambda e: audio_iter(voice))
         state[voice.channel.id] = (chapter, verse)
+        voice.play(audio, after=lambda e:audio_iter(voice))
+        voice.loop.create_task(voice.guild.me.edit(nick=get_name(voice, 'play')))
 
 
 def next_path(chapter, verse):
