@@ -1,21 +1,43 @@
 from collections import OrderedDict
 
 
-async def to_ascii(txt):
-    ret = []
-    for ch in txt:
-        if ch in repls:
-            ret.append(repls[ch])
-        else:
-            ret.append(ch)
-    return ''.join(ret)
+class Book:
+    def __init__(self, book):
+        self._book = self._check_begining(book)
+
+    def __str__(self):
+        return self._book
+
+    @property
+    def book(self):
+        return self._book
+
+    @property
+    def pretty(self):
+        return books[self._book]
+
+    def next(self):
+        try:
+            self._book = list(books.keys())[list(books.keys()).index(self.book) + 1]
+        except KeyError:
+           self._book = list(books.keys())[0]
+        return self._book
+
+    def _to_ascii(self, txt):
+        ret = []
+        for ch in txt:
+            if ch in repls:
+                ret.append(repls[ch])
+            else:
+                ret.append(ch)
+        return ''.join(ret)
 
 
-async def check_begining(txt):
-    for book in chapters:
-        b = await to_ascii(book.lower())
-        if b.startswith(txt):
-            return chapters[book]
+    def _check_begining(self, txt):
+        for book in chapters:
+            b = self._to_ascii(book.lower())
+            if b.startswith(txt):
+                return chapters[book]
 
 
 repls = {
