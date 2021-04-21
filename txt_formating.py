@@ -79,7 +79,7 @@ books = OrderedDict([
     ("koh", "Kazateľ"),
     ("vlp", "Veľpieseň"),
     ("iz", "Izaiáš"),
-    ("je", "Jeremiáš"),
+    ("jer", "Jeremiáš"),
     ("nar", "Náreky"),
     ("ez", "Ezechiel"),
     ("dan", "Daniel"),
