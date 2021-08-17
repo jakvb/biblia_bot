@@ -19,8 +19,8 @@ class Book:
     def next(self):
         try:
             self._book = list(books.keys())[list(books.keys()).index(self.book) + 1]
-        except KeyError:
-           self._book = list(books.keys())[0]
+        except IndexError:
+            self._book = list(books.keys())[0]
         return self._book
 
     def _to_ascii(self, txt):
@@ -31,7 +31,6 @@ class Book:
             else:
                 ret.append(ch)
         return ''.join(ret)
-
 
     def _check_begining(self, txt):
         for book in chapters:

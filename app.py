@@ -25,7 +25,6 @@ state = {}
 #  posuvanie v case (seek)
 
 
-
 def download_audio(book, chapter):
     url = f'https://api2.biblia.sk/api/audio/{book}/{chapter}'
     ret = requests.get(url)
