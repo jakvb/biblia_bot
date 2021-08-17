@@ -8,7 +8,7 @@ from txt_formating import Book
 
 
 log = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
+logging.basicConfig(level=logging.INFO, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
 
 bot = commands.Bot(command_prefix= "$")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
@@ -177,9 +177,9 @@ class Player:
         voice = self.voice
         audio = discord.FFmpegPCMAudio(self.state.path)
         if self.state.infinite:
-            voice.play(audio, after=lambda e:self.play(next_state=True))
+            voice.play(audio, after=lambda e: self.play(next_state=True))
         else:
-            task = lambda e:voice.loop.create_task(voice.guild.me.edit(nick=get_name(voice, 'stop')))
+            task = lambda e: voice.loop.create_task(voice.guild.me.edit(nick=get_name(voice, 'stop')))
             voice.play(audio, after=task)
         voice.loop.create_task(voice.guild.me.edit(nick=get_name(voice, 'play')))
 
@@ -192,7 +192,8 @@ class Player:
         # hack na prerusenie infinite loopu
         try:
             self.voice.play(discord.FFmpegPCMAudio(''))
-        except:
+        except Exception:
+            log.exception(e)
             pass
 
         self.voice.stop()
@@ -232,5 +233,6 @@ class State:
     def previous(self):
         state[self.channel_id] = self
         pass
+
 
 bot.run(config('TOKEN'))
