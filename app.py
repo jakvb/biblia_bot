@@ -10,7 +10,7 @@ from txt_formating import Book
 log = logging.getLogger()
 logging.basicConfig(level=logging.INFO, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
 
-bot = commands.Bot(command_prefix= "$")
+bot = commands.Bot(command_prefix="$")
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
 state = {}
@@ -90,7 +90,7 @@ async def stop(ctx):
     Player(voice).stop()
     await ctx.message.guild.me.edit(nick=get_name(voice))
     await ctx.channel.purge(limit=1)
-    await ctx.send("command STOP")
+    await ctx.send("STOP")
 
 
 @is_in_voice
@@ -100,7 +100,7 @@ async def pause(ctx):
     voice.pause()
     await ctx.message.guild.me.edit(nick=get_name(voice, 'pause'))
     await ctx.channel.purge(limit=1)
-    await ctx.send("command PAUSE")
+    await ctx.send("PAUSE")
 
 
 @is_in_voice
@@ -110,7 +110,7 @@ async def resume(ctx):
     voice.resume()
     await ctx.message.guild.me.edit(nick=get_name(voice, 'play'))
     await ctx.channel.purge(limit=1)
-    await ctx.send("command RESUME")
+    await ctx.send("RESUME")
 
 
 @bot.command('next')
@@ -120,7 +120,7 @@ async def next(ctx):
     channel = await get_channel(channel)
     Player(channel).next()
     await ctx.channel.purge(limit=1)
-    await ctx.send("command NEXT")
+    await ctx.send("NEXT")
 
 
 @bot.command('play')
@@ -134,11 +134,11 @@ async def play(ctx):
         # todo metoda na pause
         channel.resume()
         await ctx.message.guild.me.edit(nick=get_name(channel, 'play'))
-        await ctx.send(f"command PLAY")
+        await ctx.send(f"PLAY")
     else:
-        s= State(channel, *content.split(' '))
+        s = State(channel, *content.split(' '))
         Player(channel, s).play()
-        await ctx.send(f"command PLAY {s.book.pretty} {s.chapter}")
+        await ctx.send(f"PLAY {s.book.pretty} {s.chapter}")
 
 
 @bot.command('infinite')
@@ -150,14 +150,14 @@ async def infinite(ctx):
     await ctx.channel.purge(limit=1)
     if 'on' in content or not content:
         Player(channel).state.infinite = True
-        await ctx.send(f"command INFINITE ON")
+        await ctx.send(f"INFINITE ON")
     elif 'off' in content:
         Player(channel).state.infinite = False
-        await ctx.send(f"command PLAY OFF")
+        await ctx.send(f"PLAY OFF")
     else:
         s = State(channel, *content.split(' '), infinite=True)
         Player(channel, s).play()
-        await ctx.send(f"command INFINITE play from {s.book.pretty} {s.chapter}")
+        await ctx.send(f"INFINITE play from {s.book.pretty} {s.chapter}")
 
 
 class Player:
@@ -193,7 +193,6 @@ class Player:
         try:
             self.voice.play(discord.FFmpegPCMAudio(''))
         except Exception:
-            log.exception(e)
             pass
 
         self.voice.stop()
