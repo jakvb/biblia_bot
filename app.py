@@ -10,7 +10,9 @@ from txt_formating import Book
 log = logging.getLogger()
 logging.basicConfig(level=logging.INFO, filename=os.path.dirname(os.path.abspath(__file__))+'/app.log')
 
-bot = commands.Bot(command_prefix="$")
+intents = discord.Intents.all()
+intents.message_content = True
+bot = commands.Bot(command_prefix='$', intents=intents)
 AUDIO_PATH = os.path.dirname(os.path.abspath(__file__)) + '/audio/'
 FILENAME_TEMPLATE = '{}_{}'
 state = {}
